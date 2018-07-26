@@ -1,0 +1,38 @@
+body {
+    font-family:arial;
+    margin:20px;
+
+}
+
+h1, h2, h3 {
+    margin:0;
+    padding:0;
+}
+
+.ui-widget {
+    font-size:.85em;
+}
+
+h1 {
+    text-align:center;
+}
+
+h2 {
+    padding:10px 0 0 0;
+}
+
+#curve_chart {
+    border:gray thin solid;
+    width:1500px;
+    height:500px;
+    margin:auto;
+}
+
+#field-wrapper {
+    display:inline-block;
+}
+
+#year-wrapper {
+    display:inline-block;
+    padding-left:20px;
+}

@@ -1,0 +1,265 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="base-script.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        // google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart(raw_data, title) {
+            var data = google.visualization.arrayToDataTable( raw_data );
+
+            var options = {
+                title: title,
+                curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+            chart.draw(data, options);
+        }
+    </script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div style="float:right;margin-right:20px;"><a href="https://webstats.ucar.edu/">See CISL AWstats index</a></div>
+<h1>Web Statistics</h1>
+<div id="curve_chart" ></div>
+
+<!--
+<button id="sample-button" type="button">Click Me</button>
+-->
+
+<div id="field-wrapper" >
+    <h2>Field</h2>
+    <fieldset id="field-selector">
+        <legend>Select Field: </legend>
+    </fieldset>
+</div>
+
+<div id="year-wrapper">
+<h2>Year</h2>
+<fieldset id="year-selector">
+    <legend>Select a Year: </legend>
+</fieldset>
+</div>
+
+
+
+<h2>Hosts</h2>
+<fieldset id="host-selector">
+    <legend>Select Hosts: </legend>
+</fieldset>
+
+
+
+
+</body>
+<script>
+
+    var FIELD_NAMES = [
+        'Unique visitors',
+        'Number of visits',
+        'Pages',
+        'Hits',
+        'Bandwidth'
+    ];
+
+    var HOSTS = [
+        "aspace.archives.ucar.edu",
+        "library.ucar.edu",
+        "nldr.library.ucar.edu",
+        "opensky.ucar.edu",
+        "osws.ucar.edu",
+        "uc.dls.ucar.edu",
+        "ucarconnect.ucar.edu",
+        "www.archives.ucar.edu",
+        "www.dlese.org",
+        "www.opensky.library.ucar.edu",
+    ]
+
+    $(function () {
+        $('#sample-button')
+                .button()
+                .click (function (event) {
+
+                    log ('selected year: ' + get_selected_year());
+                    log ('selected field: ' + get_selected_field());
+                    log ('selected hosts: ' + get_selected_hosts());
+
+                });
+
+        initializeYearSelector();
+        initializeFieldSelector();
+        initializeHostSelector();
+
+        setTimeout(function () {
+            updateChart();
+        }, 500);
+
+    })
+
+    function get_selected_year () {
+        var $el = $('input[name=year]:checked');
+        return parseInt($el.prop('id').replace('year_',''))
+    }
+
+    function get_selected_field() {
+        $el = $('input[name=field]:checked');
+        var index = parseInt($el.prop('id').replace('field_',''));
+        return FIELD_NAMES[index];
+    }
+
+    function get_selected_hosts() {
+        var selected_hosts = [];
+        $('input[name=host]:checked').each (function (i, el) {
+            var index = parseInt(el.id.replace('host_',''));
+            selected_hosts.push (HOSTS[index]);
+        })
+
+        if (!selected_hosts.length)
+            return HOSTS;
+
+        return selected_hosts;
+    }
+
+    function updateChart () {
+
+        // get selected year
+        var year = get_selected_year();
+
+        // get selected field
+        var field = get_selected_field();
+
+
+        var url = 'data/' + year + '_' + field.replace(/ /g, '_') + '.js';
+        log (url);
+
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            success: function (result, textStatus, jqXHR) {
+//                slog(result);
+                var hosts = get_selected_hosts();
+                if (hosts.length != HOSTS.length) {
+                    log ("FILTER DATA ...")
+                    result = filterData(result, hosts);
+                }
+                drawChart (result, field + ' - ' + year);
+            }
+        })
+
+    }
+
+    function filterData(data, hosts) {
+        // Filtering data for hosts
+
+        var schema = data[0];
+        log ('SCHEMA: ' + schema);
+        log ("hosts: " + hosts);
+
+        // we need the indices of the columns we will keep
+        var keepers = [0]
+        $(schema).each (function (i, host) {
+            log ("looking for " + host)
+            if (hosts.indexOf(host) != -1) {
+                log("  - found!")
+                keepers.push(i)
+            }
+        })
+
+        log ("keepers: " + keepers);
+
+        var new_data = []
+        log ("going through data")
+        $(data).each (function (i, row) {
+            var new_row = []
+            for (var j=0;j<row.length;j++) {
+                log ('- ' + row[j])
+                if (keepers.indexOf(j) != -1)
+                    new_row.push(row[j]);
+            }
+            new_data.push (new_row);
+        })
+        return new_data;
+    }
+
+    function initializeYearSelector() {
+        // YEAR selectore
+        for (var i=2012; i < 2019;i++) {
+            $('#year-selector')
+                    .append($t('label')
+                            .attr('for', 'year_' + i)
+                            .html(i))
+                    .append($t('input')
+                            .attr('type', 'radio')
+                            .attr('name', 'year')
+                            .attr('id', 'year_' + i))
+        }
+
+        $('input[name=year]')
+                .checkboxradio()
+                .click (function () {
+                    updateChart();
+                })
+        $('fieldset#year-selector').controlgroup();
+
+        $('#year_2018')
+                .prop('checked', true)
+                .checkboxradio( "refresh" );
+    }
+
+    function initializeFieldSelector() {
+        $(FIELD_NAMES).each (function (i, field) {
+            $('#field-selector')
+                    .append($t('label')
+                            .attr('for', 'field_' + i)
+                            .html(field))
+                    .append($t('input')
+                            .attr('type', 'radio')
+                            .attr('name', 'field')
+                            .attr('id', 'field_' + i))
+        })
+
+        $('input[name=field]')
+                .checkboxradio()
+                .click (function () {
+                    updateChart();
+                })
+        $('fieldset#field-selector').controlgroup();
+
+        $('#field_0')
+                .prop('checked', true)
+                .checkboxradio( "refresh" );
+    }
+
+    function initializeHostSelector() {
+        $(HOSTS).each (function (i, host) {
+            $('#host-selector')
+                    .append($t('label')
+                            .attr('for', 'host_' + i)
+                            .html(host))
+                    .append($t('input')
+                            .attr('type', 'checkbox')
+                            .attr('name', 'host')
+                            .attr('id', 'host_' + i))
+        })
+
+        $('input[name=host]')
+                .checkboxradio()
+                .click (function () {
+                    updateChart();
+                })
+        $('fieldset#host-selector').controlgroup();
+
+        $('#host_0')
+                .prop('checked', true)
+                .checkboxradio( "refresh" );
+    }
+
+</script>
+</html>
