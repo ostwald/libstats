@@ -36,3 +36,49 @@ h2 {
     display:inline-block;
     padding-left:20px;
 }
+
+/* ----------------------- */
+#download-table-wrapper {
+    width: 1000px;
+    margin:30px auto;
+}
+#download-table {
+    border-collapse:collapse;
+}
+
+    #download-table td, th {
+        border:black thin solid;
+
+    }
+
+    #download-table th {
+        padding:5px;
+        background-color:lightgrey;
+        min-width:100px;
+    }
+
+    #download-table th.sortable {
+        cursor:pointer;
+    }
+
+    #download-table th.sortable:hover {
+        background:lightyellow;
+    }
+
+    #download-table td {
+        text-align:center;
+    }
+
+    #download-table td.even {
+        background:lightgrey;
+    }
+
+    #download-table td.number {
+        padding:5px 40px 5px;
+        text-align:right;
+    }
+
+    #download-table td.pid-link {
+        padding:0px 10px 0px 10px;
+        background:red;
+    }

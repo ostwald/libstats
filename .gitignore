@@ -4,3 +4,4 @@
 *.sav
 *.bak
 .DS_Store
+.idea

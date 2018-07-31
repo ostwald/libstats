@@ -26,8 +26,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div style="float:right;margin-right:20px;"><a href="https://webstats.ucar.edu/">See CISL AWstats index</a></div>
-<h1>Web Statistics</h1>
+<div style="float:right;margin-right:20px;">
+    <div><a href="https://webstats.ucar.edu/">See CISL AWstats index</a></div>
+    <div><a href="opensky_downloads.html">See OpenSky downloads</a></div>
+</div>
+<h1>Web Statistics - Access</h1>
 <div id="curve_chart" ></div>
 
 <!--
@@ -136,7 +139,7 @@
         var field = get_selected_field();
 
 
-        var url = 'data/' + year + '_' + field.replace(/ /g, '_') + '.js';
+        var url = 'data/access/' + year + '_' + field.replace(/ /g, '_') + '.json';
         log (url);
 
         $.ajax({
@@ -159,29 +162,43 @@
         // Filtering data for hosts
 
         var schema = data[0];
-        log ('SCHEMA: ' + schema);
-        log ("hosts: " + hosts);
+//        log ('SCHEMA: ' + schema);
+//        log ("hosts: " + hosts);
 
         // we need the indices of the columns we will keep
+        // schema is list of host names. The keepers are the indexes of the hosts
+        // for which we will display data
         var keepers = [0]
         $(schema).each (function (i, host) {
-            log ("looking for " + host)
+//            log ("looking for " + host)
             if (hosts.indexOf(host) != -1) {
-                log("  - found!")
+//                log("  - found!")
                 keepers.push(i)
             }
         })
 
-        log ("keepers: " + keepers);
+//        log ("keepers: " + keepers);
+
+        var bandwidth_index = schema.indexOf("Bandwidth");
+        log ("bandwidth_index: " + bandwidth_index);
 
         var new_data = []
-        log ("going through data")
         $(data).each (function (i, row) {
             var new_row = []
             for (var j=0;j<row.length;j++) {
-                log ('- ' + row[j])
-                if (keepers.indexOf(j) != -1)
-                    new_row.push(row[j]);
+                if (keepers.indexOf(j) != -1) {
+                    // Bandwidth is a problem, since it is a string at this point
+                    // but we want to convert it to float. it is the only graphable value
+                    // that is represented as a string at this point.
+                    // row 0 is header - don't change anything
+                    // column 0 is month (a string) which we leave alone
+                    var val = row[j];
+//                    log (val + ' (' + typeof (val) + ') col: ' + j + ', row: ' + i);
+                    if (i > 0 && j > 0 && typeof(val) == 'string') {
+                        val = parseFloat(val);
+                    }
+                    new_row.push(val);
+                }
             }
             new_data.push (new_row);
         })
@@ -189,7 +206,6 @@
     }
 
     function initializeYearSelector() {
-        // YEAR selectore
         for (var i=2012; i < 2019;i++) {
             $('#year-selector')
                     .append($t('label')

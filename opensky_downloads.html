@@ -1,0 +1,174 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="base-script.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        // google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart(raw_data, title) {
+            var data = google.visualization.arrayToDataTable( raw_data );
+
+            var options = {
+                title: title,
+                curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+            chart.draw(data, options);
+        }
+    </script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="styles.css">
+    <title>OpenSky downloads</title>
+</head>
+<body>
+<div style="float:right;margin-right:20px;"><a href="https://webstats.ucar.edu/">See CISL AWstats index</a></div>
+<h1>OpenSky downloads</h1>
+<div id="download-table-wrapper">
+    <table id="download-table" ></table>
+</div>
+
+
+
+</body>
+<script>
+
+    var DATA_URL = 'data/downloads_1000.json';
+
+    var FIELD_NAMES = [
+        'Unique visitors',
+        'Number of visits',
+        'Pages',
+        'Hits',
+        'Bandwidth'
+    ];
+
+    var HOSTS = [
+        "aspace.archives.ucar.edu",
+        "library.ucar.edu",
+        "nldr.library.ucar.edu",
+        "opensky.ucar.edu",
+        "osws.ucar.edu",
+        "uc.dls.ucar.edu",
+        "ucarconnect.ucar.edu",
+        "www.archives.ucar.edu",
+        "www.dlese.org",
+        "www.opensky.library.ucar.edu",
+    ]
+
+    $(function () {
+
+        setTimeout(function () {
+            updateTable();
+        }, 0);
+
+    })
+
+    function decorateTable () {
+        // Sorting is not active so remove class
+        $('#download-table th').each (function (i, cell) {
+            $(cell).removeClass('sortable');
+        });
+
+        return;
+
+        $('#download-table th.sortable').click (function () {
+            log ("OUCH: "+ $(this).text());
+            sortTable($('#download-table'), $(this).text(), 'asc');
+        })
+
+
+    }
+
+    /* NOT WORKING with more than a few rows .... :( */
+    function sortTable ($table, col, order) {
+        var $rows = $('tbody > tr.data-row', $table);
+        $rows.sort(function (a, b) {
+            var keyA = parseInt($('td.'+col, a).text());
+            var keyB = parseInt($('td.'+col, b).text());
+            if (order=='asc') {
+                return (keyA > keyB) ? 1 : 0;
+            } else {
+                return (keyA > keyB) ? 0 : 1;
+            }
+        });
+        $.each($rows, function (index, row) {
+            $table.append(row);
+        });
+    }
+
+    function updateTable() {
+        // Get the data
+        $.ajax({
+            url: DATA_URL,
+            dataType: 'json',
+            success: function (data, textStatus, jqXHR) {
+//                slog(result);
+                drawTable (data);
+            }
+        })
+        $('#download-table').html("");
+    }
+
+    function drawTable (data) {
+
+        var max = 1000;
+
+        // slog (data);
+        var $table = $('#download-table')
+        var $header = $t('tr')
+        var schema = data[0];
+        slog (schema)
+        for (var i=1;i<schema.length;i++) {
+            var className = ''
+            if (i > 1) {
+                className = 'sortable';
+            }
+            $header.append($t('th')
+                    .addClass (schema[i])
+                    .addClass(className)
+                    .html(schema[i]));
+        }
+        $table.html($header);
+
+        var num_rows = Math.min (max, data.length)
+        for (var row = 1;row < num_rows; row++) {
+            var even = row % 2 == 0;
+            log ("row: " + row + ", even: " + even);
+            var rec = data[row];
+            var $row = $t('tr')
+                    .addClass('data-row');
+            for (var col=1;col<schema.length;col++) {
+                var classNames = even ? "even" : "";
+
+                if (col == 1) {
+                    $row.append ($t('td')
+                            .addClass(classNames + ' pid-link')
+                            .html($t('a')
+                                .attr('href', 'http://opensky.ucar.edu/islandora/object/' + rec[col])
+                                .prop('target', 'opensky')
+                                .html(rec[col])));
+                }
+                else {
+                    classNames += " number";
+                    $row.append($t('td')
+                            .addClass(classNames +  " number")
+                            .addClass(schema[col])
+                            .html(rec[col]));
+                }
+                // use field-name to support sorting
+                ;
+            }
+            $table.append($row);
+        }
+
+        decorateTable();
+    }
+
+</script>
+</html>
