@@ -3,20 +3,26 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="base-script.js"></script>
+    <script type="text/javascript" src="menu.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['corechart']});
         // google.charts.setOnLoadCallback(drawChart);
 
-        function drawChart(raw_data, title) {
+        function drawChart(raw_data, title, maxV) {
+
             var data = google.visualization.arrayToDataTable( raw_data );
 
             var options = {
                 title: title,
 //                curveType: 'function',
                 legend: { position: 'bottom' },
-                vAxis: { maxValue: 30000}
+                // vAxis: { maxValue: maxV}
             };
+
+            if (maxV) {
+                options.vAxis = { maxValue: maxV};
+            }
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
@@ -58,12 +64,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div style="float:right;margin-right:20px;">
-    <div><a href="https://webstats.ucar.edu/">CISL AWstats index</a></div>
-    <div><a href="opensky_downloads.html">OpenSky downloads</a></div>
-</div>
-<h1>General Access</h1>
-<div id="menu-wrapper"></div>
+
+<table id="menu"></table>
+
+<h1 class="page-title">General Access</h1>
+
 <div id="curve_chart" ></div>
 
 <!--
@@ -84,6 +89,17 @@
 </fieldset>
 </div>
 
+<div id="controls-wrapper">
+    <div class="fooberry">
+        <label for="copy-url">Copy URL</label>
+        <button id="copy-url" class="explorer-button"
+                type="button" title="Copy URL to clipboard"></button>
+    </div>
+    <div class="fooberry" style="width:100px;margin:auto;">
+        <label for="max-vaxis">Max V Axis</label>
+        <input id="max-vaxis" size="6" title="Set Max Vertical Axis" style="font-size:1em" / >
+    </div>
+</div>
 
 
 <h2>Hosts</h2>
@@ -91,15 +107,8 @@
     <legend>Select Hosts: </legend>
 </fieldset>
 
-<div class="control-wrapper" style="display:block;">
-    <label for="copy-url">Copy URL</label>
-    <button id="copy-url" class="explorer-button"
-            type="button" title="Copy URL to clipboard"></button>
-    <div id="flash-msg">what it is</div>
-</div>
 
 <textarea id="display-url"></textarea>
-
 
 </body>
 <script>
@@ -155,8 +164,6 @@
         }, 500);
 
 
-        // $('#display-url').html(decodeURIComponent(window.location));
-
         /* Result controls */
         $('#copy-url')
             .button({icons: {primary: 'ui-icon-clipboard'}})
@@ -166,7 +173,13 @@
             })
             .attr ('title', 'Copy request URL to clipboard')
 
-        render_menu ('#menu-wrapper');
+//        render_menu ('#menu-wrapper');
+
+        var MENU = new Menu ('#menu');
+
+        $('#max-vaxis').change (function (event) {
+            updateChart();
+        })
 
     })
 

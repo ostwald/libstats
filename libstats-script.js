@@ -31,21 +31,43 @@ function updateChart () {
     // get selected field
     var field = get_selected_field();
 
+    var hosts = get_selected_hosts();
 
-    var url = 'data/access/' + year + '_' + field.replace(/ /g, '_') + '.json';
-    log (url);
+    var data_url = 'data/' + DATA_DIR + '/' + year + '_' + field.replace(/ /g, '_') + '.json';
+    log (data_url);
+
+    var maxV = $('#max-vaxis').val()
+    log ("maxV: " + maxV);
+
+    var url = window.location.href;
+    var i = url.indexOf('?');
+    if (i != -1) {
+        url = url.substr(0, i);
+    }
+
+    url = url + '?' + $.param({
+            year:parseInt(year) - 2012,
+            field:FIELD_NAMES.indexOf(field),
+            host:hosts.map(function (h) {
+                return HOSTS.indexOf(h);
+            })
+    })
+
+    $('#display-url').html(decodeURIComponent(url));
+
+    log ("DIsPLAY_URL: " + url);
 
     $.ajax({
-        url: url,
+        url: data_url,
         dataType: 'json',
         success: function (result, textStatus, jqXHR) {
 //                slog(result);
-            var hosts = get_selected_hosts();
+//             var hosts = get_selected_hosts();
             if (hosts.length != HOSTS.length) {
                 log ("FILTER DATA ...")
                 result = filterData(result, hosts);
             }
-            drawChart (result, field + ' - ' + year);
+            drawChart (result, field + ' - ' + year, maxV);
         }
     })
 
@@ -69,11 +91,6 @@ function filterData(data, hosts) {
             keepers.push(i)
         }
     })
-
-//        log ("keepers: " + keepers);
-
-    var bandwidth_index = schema.indexOf("Bandwidth");
-    log ("bandwidth_index: " + bandwidth_index);
 
     var new_data = []
     $(data).each (function (i, row) {
@@ -119,7 +136,7 @@ function initializeYearSelector() {
 
     var selector = '#year_2018'; // default
     if (PARAMS['year']) {
-        selector = '#year_'+PARAMS['year']
+        selector = '#year_'+YEARS[PARAMS['year']]
     } else {
         log ("NO year - using default")
     }
@@ -150,8 +167,6 @@ function initializeFieldSelector() {
 
     var field_index = PARAMS['field'] || 1;
 
-    log ('field_index: ' + field_index)
-
     $('#field_'+field_index)
         .prop('checked', true)
         .checkboxradio( "refresh" );
@@ -176,7 +191,7 @@ function initializeHostSelector() {
         })
     $('fieldset#host-selector').controlgroup();
 
-    var hosts = PARAMS['host']
+    var hosts = PARAMS['host[]']
     if (!hosts) {
         hosts = [1]; // default
     }
@@ -185,7 +200,6 @@ function initializeHostSelector() {
     }
 
     $(hosts).each(function (i, h) {
-        log (' -'+ i + ': ' + h)
         $('#host_' + h)
             .prop('checked', true)
             .checkboxradio( "refresh" );

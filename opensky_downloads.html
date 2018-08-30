@@ -3,6 +3,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="base-script.js"></script>
+    <script type="text/javascript" src="menu.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['corechart']});
@@ -27,13 +28,12 @@
     <title>OpenSky downloads</title>
 </head>
 <body>
-<div style="float:right;margin-right:20px;"><a href="https://webstats.ucar.edu/">See CISL AWstats index</a></div>
-<h1>OpenSky downloads</h1>
-<div id="download-table-wrapper">
-    <table id="download-table" ></table>
-</div>
 
+<table id="menu"></table>
 
+<h1  class="page-title">OpenSky downloads</h1>
+
+<table id="download-table" ></table>
 
 </body>
 <script>
@@ -66,6 +66,8 @@
         setTimeout(function () {
             updateTable();
         }, 0);
+
+        var MENU = new Menu ('#menu');
 
     })
 
@@ -139,7 +141,6 @@
         var num_rows = Math.min (max, data.length)
         for (var row = 1;row < num_rows; row++) {
             var even = row % 2 == 0;
-            log ("row: " + row + ", even: " + even);
             var rec = data[row];
             var $row = $t('tr')
                     .addClass('data-row');

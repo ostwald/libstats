@@ -17,6 +17,10 @@ h1 {
     text-align:center;
 }
 
+h1.page-title {
+    margin:20px auto;
+}
+
 h2 {
     padding:10px 0 0 0;
 }
@@ -37,13 +41,17 @@ h2 {
     padding-left:20px;
 }
 
-/* ----------------------- */
-#download-table-wrapper {
-    width: 1000px;
-    margin:30px auto;
+#controls-wrapper {
+    display:inline-block;
+    padding-left:20px;
 }
+
+/* ----------------------- */
+
 #download-table {
     border-collapse:collapse;
+    width: 800px;
+    margin:auto;
 }
 
     #download-table td, th {
@@ -82,3 +90,51 @@ h2 {
         padding:0px 10px 0px 10px;
         background:auto;
     }
+
+#display-url {
+    position:absolute;
+    top:-50px;
+    display:block;
+    font-size:.85em;
+    padding-top:5px;
+    text-align:left;
+    max-width:600px;
+    height:25px;
+    /* word-wrap:break-word; */
+}
+
+#menu {
+    border-collapse:collapse;
+    width:700px;
+    margin:10px auto;
+}
+
+#menu td {
+    padding:7px 20px;
+    text-align:center;
+    border:black solid thin;
+}
+
+#menu td.active {
+    cursor:pointer;
+}
+
+#menu td.active:hover {
+    background:lightyellow;
+}
+
+#menu td.current {
+    font-weight:bold;
+    /*color:grey;*/
+}
+
+.fooberry {
+    text-align:center;
+    display:inline-block;
+}
+
+#controls-wrapper label {
+    display:block;
+    font-size:.85em;
+    padding-bottom:5px;
+}

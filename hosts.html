@@ -3,6 +3,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="base-script.js"></script>
+    <script type="text/javascript" src="menu.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['corechart']});
@@ -15,42 +16,14 @@
                 title: title,
 //                curveType: 'function',
                 legend: { position: 'bottom' },
-                vAxis: { maxValue: 30000}
+                vAxis: { maxValue: 100}
+
             };
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
             chart.draw(data, options);
-
-            google.visualization.events.addListener (chart, 'select', selectHandler)
-
-            function selectHandler(event) {
-                log ("something was selected")
-                var selection = chart.getSelection();
-                var message = '';
-
-                for (var i = 0; i < selection.length; i++) {
-                    var item = selection[i];
-                    if (item.row != null && item.column != null) {
-                        message += '{row:' + item.row + ',column:' + item.column + '}';
-                        log ("Host: " + data.getColumnLabel(item.column));
-                        log ("Month: " + (item.row + 1));
-                        log ("value: " + data.getValue(item.row, item.column))
-                    } else if (item.row != null) {
-                        message += '{row:' + item.row + '}';
-                    } else if (item.column != null) {
-                        message += '{column:' + item.column + '}';
-                    }
-                }
-                if (message == '') {
-                    message = 'nothing';
-                }
-                log('You selected ' + message);
-            }
-
         }
-
-
     </script>
     <script type="text/javascript" src="libstats-script.js"></script>
 
@@ -58,12 +31,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div style="float:right;margin-right:20px;">
-    <div><a href="https://webstats.ucar.edu/">CISL AWstats index</a></div>
-    <div><a href="opensky_downloads.html">OpenSky downloads</a></div>
-</div>
-<h1>General Access</h1>
-<div id="menu-wrapper"></div>
+
+<table id="menu"></table>
+
+<h1 class="page-title">Percentage of Remote traffic</h1>
+
 <div id="curve_chart" ></div>
 
 <!--
@@ -84,19 +56,18 @@
 </fieldset>
 </div>
 
-
+<div id="controls-wrapper">
+    <div class="fooberry" style="display:block;">
+        <label for="copy-url">Copy URL</label>
+        <button id="copy-url" class="explorer-button"
+                type="button" title="Copy URL to clipboard"></button>
+    </div>
+</div>
 
 <h2>Hosts</h2>
 <fieldset id="host-selector">
     <legend>Select Hosts: </legend>
 </fieldset>
-
-<div class="control-wrapper" style="display:block;">
-    <label for="copy-url">Copy URL</label>
-    <button id="copy-url" class="explorer-button"
-            type="button" title="Copy URL to clipboard"></button>
-    <div id="flash-msg">what it is</div>
-</div>
 
 <textarea id="display-url"></textarea>
 
@@ -104,14 +75,11 @@
 </body>
 <script>
 
-
     var YEARS = [
-        2012, 2013, 2014, 2015, 2016, 2017, 2018
+            2012, 2013, 2014, 2015, 2016, 2017, 2018
     ]
 
     var FIELD_NAMES = [
-        'Unique visitors',
-        'Number of visits',
         'Pages',
         'Hits',
         'Bandwidth'
@@ -130,7 +98,7 @@
         "www.opensky.library.ucar.edu",
     ]
 
-    var DATA_DIR = 'access'
+    var DATA_DIR = 'hosts'
 
     $(function () {
 
@@ -166,7 +134,7 @@
             })
             .attr ('title', 'Copy request URL to clipboard')
 
-        render_menu ('#menu-wrapper');
+        var MENU = new Menu ('#menu');
 
     })
 
