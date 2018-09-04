@@ -27,9 +27,18 @@ h2 {
 
 #curve_chart {
     border:gray thin solid;
-    width:1500px;
+    /*width:1500px;*/
+    width:100%;
     height:500px;
     margin:auto;
+}
+
+.wide-centered {
+    border:greenyellow thin solid;
+    /*width:1500px;*/
+    width:100%;
+    margin:auto;
+    text-align:center;
 }
 
 #field-wrapper {

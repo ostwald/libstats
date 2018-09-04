@@ -26,12 +26,87 @@
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
+
+            // CUSTOM ACTION ------------
+
+           chart.setAction({
+                id: 'percent_remote_action',
+                text: 'Percentage remote traffic',
+                action: seePercentRemote,
+                visible: function() {
+                    return true;
+                },
+                enabled: function() {
+                    return true;
+                }
+            })
+
+            chart.setAction({
+                id: 'rawStats_action',
+                text: 'Raw AWStats',
+                action:openAWStatsUrl,
+                visible: function() {
+                    return true;
+                },
+                enabled: function() {
+                    return true;
+                }
+            })
+
+            options.tooltip = {trigger:'selection'}
+
+
+            // -----------------
+
             chart.draw(data, options);
 
-            google.visualization.events.addListener (chart, 'select', selectHandler)
+
+            // google.visualization.events.addListener (chart, 'select', selectHandler)
+
+
+            function seePercentRemote() {
+
+                log ('seePercentRemote');
+
+                var url = $('#display-url').val().replace('access', 'hosts');
+                log ("URL: " + url);
+
+//                window.open (url)
+
+                window.location = url;
+
+            }
+
+            function openAWStatsUrl() {
+
+                var selection = chart.getSelection();
+                var message = '';
+
+                var item = selection[0];
+                if (item.row != null && item.column != null) {
+                    message += '{row:' + item.row + ',column:' + item.column + '}';
+                    log ("Host: " + data.getColumnLabel(item.column));
+                    log ("Month: " + (item.row + 1));
+                    log ("value: " + data.getValue(item.row, item.column))
+                }
+
+                var params = {
+                    month: parseInt(item.row) + 1,
+                    year: get_selected_year(),
+                    config: data.getColumnLabel(item.column)
+                }
+                var url = 'https://webstats.ucar.edu/awstats.php?' + $.param(params);
+                log ("URL: " + url);
+
+                window.open (url)
+
+            }
 
             function selectHandler(event) {
                 log ("something was selected")
+//                if (event.shiftKey) {
+//                    log ("SHIFT KEY pressed!");
+//                }
                 var selection = chart.getSelection();
                 var message = '';
 
@@ -75,37 +150,39 @@
 <button id="sample-button" type="button">Click Me</button>
 -->
 
-<div id="field-wrapper" >
-    <h2>Field</h2>
-    <fieldset id="field-selector">
-        <legend>Select Field: </legend>
+<div class="wide-centered">
+    <div id="field-wrapper" >
+        <h2>Field</h2>
+        <fieldset id="field-selector">
+            <legend>Select Field: </legend>
+        </fieldset>
+    </div>
+
+    <div id="year-wrapper">
+    <h2>Year</h2>
+    <fieldset id="year-selector">
+        <legend>Select a Year: </legend>
+    </fieldset>
+    </div>
+
+    <div id="controls-wrapper">
+        <div class="fooberry">
+            <label for="copy-url">Copy URL</label>
+            <button id="copy-url" class="explorer-button"
+                    type="button" title="Copy URL to clipboard"></button>
+        </div>
+        <div class="fooberry" style="width:100px;margin:auto;">
+            <label for="max-vaxis">Max V Axis</label>
+            <input id="max-vaxis" size="6" title="Set Max Vertical Axis" style="font-size:1em" / >
+        </div>
+    </div>
+
+
+    <h2>Hosts</h2>
+    <fieldset id="host-selector">
+        <legend>Select Hosts: </legend>
     </fieldset>
 </div>
-
-<div id="year-wrapper">
-<h2>Year</h2>
-<fieldset id="year-selector">
-    <legend>Select a Year: </legend>
-</fieldset>
-</div>
-
-<div id="controls-wrapper">
-    <div class="fooberry">
-        <label for="copy-url">Copy URL</label>
-        <button id="copy-url" class="explorer-button"
-                type="button" title="Copy URL to clipboard"></button>
-    </div>
-    <div class="fooberry" style="width:100px;margin:auto;">
-        <label for="max-vaxis">Max V Axis</label>
-        <input id="max-vaxis" size="6" title="Set Max Vertical Axis" style="font-size:1em" / >
-    </div>
-</div>
-
-
-<h2>Hosts</h2>
-<fieldset id="host-selector">
-    <legend>Select Hosts: </legend>
-</fieldset>
 
 
 <textarea id="display-url"></textarea>

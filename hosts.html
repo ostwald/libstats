@@ -22,7 +22,63 @@
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
+            // CUSTON ACTIONS
+            chart.setAction({
+                id: 'general_access_action',
+                text: 'General Access graph',
+                action: function () {
+
+                    var url = $('#display-url').val().replace('hosts', 'access');
+                    log ("URL: " + url);
+
+                    window.location = url;
+                },
+                visible: function() {
+                    return true;
+                },
+                enabled: function() {
+                    return true;
+                }
+            })
+
+            chart.setAction({
+                id: 'rawStats_action',
+                text: 'Raw AWStats',
+                action: openAWStatsUrl,
+                visible: function() {
+                    return true;
+                },
+                enabled: function() {
+                    return true;
+                }
+            })
+
+            options.tooltip = {trigger:'selection'}
+
+            // END custom actions
+
             chart.draw(data, options);
+
+            function openAWStatsUrl() {
+
+                var item = chart.getSelection()[0];
+
+                if (item.row != null && item.column != null) {
+                    log ("Host: " + data.getColumnLabel(item.column));
+                    log ("Month: " + (item.row + 1));
+                    log ("value: " + data.getValue(item.row, item.column))
+                }
+
+                var params = {
+                    month: parseInt(item.row) + 1,
+                    year: get_selected_year(),
+                    config: data.getColumnLabel(item.column)
+                }
+                var url = 'https://webstats.ucar.edu/awstats.php?' + $.param(params);
+                log ("URL: " + url);
+                window.open(url);
+
+            }
         }
     </script>
     <script type="text/javascript" src="libstats-script.js"></script>
@@ -34,7 +90,7 @@
 
 <table id="menu"></table>
 
-<h1 class="page-title">Percentage of Remote traffic</h1>
+<h1 class="page-title">Remote Percentage of Traffic</h1>
 
 <div id="curve_chart" ></div>
 
@@ -42,33 +98,34 @@
 <button id="sample-button" type="button">Click Me</button>
 -->
 
-<div id="field-wrapper" >
-    <h2>Field</h2>
-    <fieldset id="field-selector">
-        <legend>Select Field: </legend>
-    </fieldset>
-</div>
-
-<div id="year-wrapper">
-<h2>Year</h2>
-<fieldset id="year-selector">
-    <legend>Select a Year: </legend>
-</fieldset>
-</div>
-
-<div id="controls-wrapper">
-    <div class="fooberry" style="display:block;">
-        <label for="copy-url">Copy URL</label>
-        <button id="copy-url" class="explorer-button"
-                type="button" title="Copy URL to clipboard"></button>
+<div class="wide-centered">
+    <div id="field-wrapper" >
+        <h2>Field</h2>
+        <fieldset id="field-selector">
+            <legend>Select Field: </legend>
+        </fieldset>
     </div>
-</div>
+
+    <div id="year-wrapper">
+    <h2>Year</h2>
+    <fieldset id="year-selector">
+        <legend>Select a Year: </legend>
+    </fieldset>
+    </div>
+
+    <div id="controls-wrapper">
+        <div class="fooberry" style="display:block;">
+            <label for="copy-url">Copy URL</label>
+            <button id="copy-url" class="explorer-button"
+                    type="button" title="Copy URL to clipboard"></button>
+        </div>
+    </div>
 
 <h2>Hosts</h2>
-<fieldset id="host-selector">
-    <legend>Select Hosts: </legend>
-</fieldset>
-
+    <fieldset id="host-selector">
+        <legend>Select Hosts: </legend>
+    </fieldset>
+</div>
 <textarea id="display-url"></textarea>
 
 
