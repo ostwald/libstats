@@ -116,7 +116,7 @@ function filterData(data, hosts) {
 }
 
 function initializeYearSelector() {
-    for (var i=2012; i < 2019;i++) {
+    for (var i=2012; i < 2020;i++) {
         $('#year-selector')
             .append($t('label')
                 .attr('for', 'year_' + i)
@@ -134,7 +134,7 @@ function initializeYearSelector() {
         })
     $('fieldset#year-selector').controlgroup();
 
-    var selector = '#year_2018'; // default
+    var selector = '#year_2019'; // default
     if (PARAMS['year']) {
         selector = '#year_'+YEARS[PARAMS['year']]
     } else {
